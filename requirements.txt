@@ -1,0 +1,6 @@
+# ===================================================================
+# tpRigToolkit-tools-rigbuilder-dccs-maya requirements file
+# ===================================================================
+
+tpRigToolkit-core
+tpRigToolkit-tools-rigbuilder
