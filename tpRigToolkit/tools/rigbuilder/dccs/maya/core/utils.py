@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 
-from tpPyUtils import osplatform, path as path_utils
+from tpDcc.libs.python import osplatform, path as path_utils
 
 
 def get_maya_rig_builder_directory():
@@ -36,3 +36,12 @@ def get_data_files_directory():
     """
 
     return os.path.join(get_maya_rig_builder_directory(), 'data')
+
+
+def get_script_files_directory():
+    """
+    Returns path where script files for tpRigToolkit.tools.rigbuilder are located
+    :return: str
+    """
+
+    return os.path.join(get_maya_rig_builder_directory(), 'scripts')
