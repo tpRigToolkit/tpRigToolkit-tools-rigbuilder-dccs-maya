@@ -8,19 +8,13 @@ Module that contains data Maya ASCII widget
 from __future__ import print_function, division, absolute_import
 
 import os
-import time
-import shutil
-import locale
-import getpass
 
-from tpMayaLib.core import helpers
-from tpMayaLib.data import base as maya_base
+import tpDcc as tp
+from tpDcc.libs.qt.widgets.library import utils
 
-import tpDccLib as tp
-from tpQtLib.widgets.library import utils
-from tpPyUtils import timedate
+from tpDcc.dccs.maya.core import helpers
+from tpDcc.dccs.maya.data import base as maya_base
 
-from tpRigToolkit.core import resource
 from tpRigToolkit.tools.rigbuilder.core import data
 
 
@@ -46,20 +40,8 @@ class MayaAsciiTransferObject(utils.TransferObject, object):
         :return: dict
         """
 
-        encoding = locale.getpreferredencoding()
-        user = getpass.getuser()
-        if user:
-            user = user.decode(encoding)
-
-        ctime = str(time.time()).split('.')[0]
-
-        self.set_metadata('user', user)
-        self.set_metadata('ctime', ctime)
-        self.set_metadata('mayaVersion', str(tp.Dcc.get_version())),
-        self.set_metadata('mayaSceneFile', tp.Dcc.scene_name())
-
-        metadata = {'metadata': self.metadata()}
-        data = self.dump(metadata)
+        data = super(MayaAsciiTransferObject, self).data_to_save()
+        # data.pop('references', list())
 
         return data
 
@@ -68,10 +50,12 @@ class MayaAscii(data.DataItem, object):
 
     Extension = '.{}'.format(maya_base.MayaAsciiFileData.get_data_extension())
     Extensions = ['.{}'.format(maya_base.MayaAsciiFileData.get_data_extension())]
+    MenuOrder = 2
     MenuName = maya_base.MayaAsciiFileData.get_data_title()
-    MenuIconPath = resource.ResourceManager().get('icons', 'maya_ascii_data.png')
-    TypeIconPath = resource.ResourceManager().get('icons', 'maya_ascii_data.png')
+    MenuIconPath = tp.ResourcesMgr().get('icons', 'maya_ascii_data.png')
+    TypeIconPath = tp.ResourcesMgr().get('icons', 'maya_ascii_data.png')
     DataType = maya_base.MayaAsciiFileData.get_data_type()
+    DefaultDataFileName = 'new_maya_ascii_file'
     PreviewWidgetClass = MayaAsciiPreviewWidget
 
     def __init__(self, *args, **kwargs):
@@ -86,61 +70,8 @@ class MayaAscii(data.DataItem, object):
         :return:
         """
 
-        student_icon = resource.ResourceManager().icon('student')
+        student_icon = tp.ResourcesMgr().icon('student')
         menu.addAction(student_icon, 'Clean Student License', self._on_clean_student_license)
-
-    def transfer_object(self):
-        """
-        Overrides base data.DataItem transfer_object function
-        Returns the transfer object used to read and write the data
-        :return: TransferObject
-        """
-
-        # We override this function to make sure that metadata file is created during transfer object creation
-        if not self._transfer_object:
-            path = self.transfer_path()
-            self._transfer_object = self.transfer_class().from_path(path, force_cration=True)
-
-        return self._transfer_object
-
-    def write(self, path, objects=None, icon_path="", sequence_path="", **options):
-        """
-        Overrides base.DataItem write function
-        :param path: str
-        :param objects: list(str)
-        :param icon_path: str
-        :param sequence_path:  str
-        :param options: dict
-        :return:
-        """
-
-        if icon_path:
-            shutil.copyfile(icon_path, path+'/thumbnail.jpg')
-        if sequence_path:
-            shutil.move(sequence_path, path+'/sequence')
-
-        comment = options.get('comment', '-')
-        name = options.get('name', 'new_maya_asii_file')
-
-        # We use the data object to store the proper data
-        data_object = self.data_object(name=name, path=path)
-        return data_object.save(comment=comment, create_version=False)
-
-    def save(self, path=None, *args, **kwargs):
-        """
-        Overrides base.DataItem write function
-        :param path: str
-        :param args: list
-        :param kwargs: dict
-        """
-
-        super(MayaAscii, self).save(path=path, *args, **kwargs)
-
-        # In Maya ASCII files we use the transfer object only to store metadata
-        # NOTE: We must do this call here because if not we will try store the file in an non valid path
-        # NOTE: because during save function all data is stored in a temporal folder until the creation process
-        # is valid
-        self.transfer_object().save(path=self.transfer_path())
 
     def _on_clean_student_license(self):
         """
@@ -164,43 +95,8 @@ class MayaAscii(data.DataItem, object):
         :return: list(dict)
         """
 
-        ctime = self.ctime()
-        if ctime:
-            ctime = timedate.time_ago(ctime)
+        info_list = super(MayaAscii, self).info() or list()
 
-        return [
-            {
-                'name': 'name',
-                'value': self.name()
-            },
-            {
-                "name": "owner",
-                "value": self.owner(),
-            },
-            {
-                "name": "created",
-                "value": ctime,
-            },
-            {
-                "name": "comment",
-                "value": self.description() or "No comment",
-            },
-        ]
+        info_list = [{k: v for k, v in d.items() if v != 'contains'} for d in info_list]
 
-    # def get_properties_widget(self):
-    #     return MayaAsciiInfoWidget(data_widget=self)
-    # # endregion
-
-
-# class MayaAsciiInfoWidget(data_maya_base.MayaInfoWidget, object):
-#     def __init__(self, data_widget, parent=None):
-#         super(MayaAsciiInfoWidget, self).__init__(data_widget, parent)
-#
-#     # region Override Functions
-#     def get_main_tab_name(self):
-#         return 'Maya ASCII'
-#
-#     def get_save_widget(self):
-#         return data_maya_base.MayaSaveFileWidget()
-    # endregion
-
+        return info_list
