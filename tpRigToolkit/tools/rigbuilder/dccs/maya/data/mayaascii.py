@@ -52,8 +52,8 @@ class MayaAscii(data.DataItem, object):
     Extensions = ['.{}'.format(maya_base.MayaAsciiFileData.get_data_extension())]
     MenuOrder = 2
     MenuName = maya_base.MayaAsciiFileData.get_data_title()
-    MenuIconPath = tp.ResourcesMgr().get('icons', 'maya_ascii_data.png')
-    TypeIconPath = tp.ResourcesMgr().get('icons', 'maya_ascii_data.png')
+    MenuIconPath = 'maya_ascii_data.png'
+    TypeIconPath = 'maya_ascii_data.png'
     DataType = maya_base.MayaAsciiFileData.get_data_type()
     DefaultDataFileName = 'new_maya_ascii_file'
     PreviewWidgetClass = MayaAsciiPreviewWidget

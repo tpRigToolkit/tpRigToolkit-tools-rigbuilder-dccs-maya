@@ -24,8 +24,8 @@ class MayaSkinClusterWeights(data.DataItem, object):
     Extensions = ['.{}'.format(maya_skin.SkinWeightsData.get_data_extension())]
     MenuName = maya_skin.SkinWeightsData.get_data_title()
     MenuOrder = 4
-    MenuIconPath = tp.ResourcesMgr().get('icons', 'skin_weights_data.png')
-    TypeIconPath = tp.ResourcesMgr().get('icons', 'skin_weights_data.png')
+    MenuIconPath = 'skin_weights_data.png'
+    TypeIconPath = 'skin_weights_data.png'
     DataType = maya_skin.SkinWeightsData.get_data_type()
     PreviewWidgetClass = MayaSkinClusterWeightsPreivewWidget
 
